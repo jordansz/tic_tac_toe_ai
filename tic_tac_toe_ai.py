@@ -80,16 +80,11 @@ def get_events():
                     bot = 'O'
                 break   # need break to stop from auto clicking game screen
             elif gameOver:
-                print("in game over")
                 # keep_playing_rec = pygame.Rect(85, 350, 590, 95)
                 if pygame.Rect(85, 350, 590, 95).collidepoint(x, y):
-                    draw()
                     revert_game_state()
-                    draw()
-                    print("here")
                     main()
                 elif pygame.Rect(90, 200, 565, 95).collidepoint(x, y):
-                    print("quiting")
                     pygame.quit()
                     exit()
 
@@ -180,6 +175,13 @@ def checkWin(turn):
     
     return False
 
+
+def checkFullBoard(b):
+    for val in b.values():
+        if val == ' ':
+            return False
+    return True
+
 def draw():
     print(board['7'] + '|' + board['8'] + '|' + board['9'] + "    7|8|9")
     print("-----    -----")
@@ -227,13 +229,16 @@ def play():
         global turn, movePos, gameOver
         draw_board()
         get_events()    
-        if count == 9:
-            gameOver = True
-            game_outcome('tie')
+        # if count == 9:
+        #     gameOver = True
+        #     game_outcome('tie')
 
         valid = validMove(movePos, turn)
         if valid:
-            if checkWin(turn) or count == 9:
+            if checkFullBoard(board):
+                gameOver = True
+                game_outcome(turn)
+            if checkWin(turn):
                 gameOver = True
                 game_outcome(turn)
             turn = 'X' if turn == 'O' else 'O'
@@ -241,6 +246,15 @@ def play():
 
         pygame.display.update()
         clock.tick(FPS)
+
+
+def mini_max(board, depth, is_max):
+    if checkWin(player):
+        return -1
+    if checkWin(bot):
+        return 1
+
+
 
 def main():
     intro()
