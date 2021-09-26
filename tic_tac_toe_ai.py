@@ -65,7 +65,7 @@ def get_events():
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = event.pos
-            global player1
+            global player1, gameOver
             if player1 == '':
                 global player2
                 # wasn't able to the collidepoint function working with o_img_rec/x_img_rec to work properly
@@ -79,9 +79,21 @@ def get_events():
                     player1 = 'X'
                     player2 = 'O'
                 break   # need break to stop from auto clicking game screen
-            if gameOver:
-                # keep_playing_rec = pygame.Rect()
-            else:
+            elif gameOver:
+                print("in game over")
+                # keep_playing_rec = pygame.Rect(85, 350, 590, 95)
+                if pygame.Rect(85, 350, 590, 95).collidepoint(x, y):
+                    draw()
+                    revert_game_state()
+                    draw()
+                    print("here")
+                    main()
+                elif pygame.Rect(90, 200, 565, 95).collidepoint(x, y):
+                    print("quiting")
+                    pygame.quit()
+                    exit()
+
+            elif player1 != '':
                 global movePos
                 count = 1
                 for i in board_pos_on_screen:
@@ -89,18 +101,21 @@ def get_events():
                     if test_rect.collidepoint(x, y):
                         movePos = str(count)
                     count += 1
+            
+                
+     
 
 
 def intro():
+    #win.fill((0, 0, 0))
+    redraw_intro()
     while player1 == '':
-        x, y = pygame.mouse.get_pos()
+        # x, y = pygame.mouse.get_pos()
         clock.tick(FPS)
         get_events()
-        redraw_intro()
         clock.tick(FPS)
 
 def game_outcome(winner):
-    print(winner)
     fade_screen = pygame.Surface((WIDTH, HEIGHT))
     fade_screen.fill((0, 0, 0))
     for alpha in range (0, 300):
@@ -111,10 +126,11 @@ def game_outcome(winner):
         pygame.time.delay(5)
     rematch = True
     if winner == "X":
-            text = font.render("Player One Wins", 1, (255, 255, 255))
+        text = font.render("Player X Wins", 1, (255, 255, 255))
+    elif winner == "O":
+        text = font.render("Player O Wins", 1, (255, 255, 255))
     else:
-        print("hereeeee")
-        text = font.render("Player Two Wins", 1, (255, 255, 255))
+        text = font.render("Tie Game!", 1, (255, 255, 255))
     end_game_text = font.render("Stop Playing", 1, (255, 255, 255))
     keep_playing_text = font.render("keep Playing", 1, (255, 255, 255))
     while rematch:
@@ -123,16 +139,10 @@ def game_outcome(winner):
         text_rec = text.get_rect()
         text_rec2 = end_game_text.get_rect()
         text_rec3 = keep_playing_text.get_rect()
-        print(text_rec2)
-        print(text_rec3)
         win.blit(end_game_text, ((WIDTH // 2) - (text_rec2.width // 2), 200))
         win.blit(keep_playing_text, ((WIDTH // 2) - (text_rec2.width // 2), 350))
         win.blit(text, ((WIDTH // 2) - (text_rec.width //2), 40))
-        pygame.display.update()
-
-        turn = 'X'
-        movePos = '0'
- 
+        pygame.display.update() 
   
 
 def redraw_intro():
@@ -142,7 +152,6 @@ def redraw_intro():
     win.blit(o_img, ((WIDTH // 4) - (o_img_rec.width // 2), HEIGHT - o_img_rec.height - 50))
     win.blit(x_img, ((WIDTH - (WIDTH // 4) - (x_img_rec.width // 2), HEIGHT - x_img_rec.height - 50)))
     pygame.display.update()
-
 
 
 def checkWin():
@@ -178,7 +187,13 @@ def draw():
     print(board['1'] + '|' + board['2'] + '|' + board['3'] + "    1|2|3")
     print("\n")
 
-def revertBoard():
+def revert_game_state():
+    global movePos, board, gameOver, player1, player2, turn
+    gameOver = False
+    turn = 'X'
+    movePos = '0'
+    player1 = ''
+    player2 = ''
     for key in board:
         board[key] = ' '
     
@@ -188,11 +203,6 @@ def validMove(p, val):
     if board[p] == ' ':
         board[p] = val
         return True
-    # elif int(p) < 1 or int(p) > 9:
-    #     print("Number out of range, choose again.")
-    # else:
-    #     print("Invalid move, pick another position.")
-    # # draw()
     return False
 
 
@@ -210,23 +220,26 @@ def play():
     global board
     run = True
     clock = pygame.time.Clock()
+    count = 0
 
     while run:
         global turn, movePos
         draw_board()
         get_events()    
-        
-        valid = validMove(movePos, turn)
 
-        if checkWin():
-            print(turn)
+        if checkWin() or count == 9:
             global gameOver
             gameOver = True
-            revertBoard()
-            game_outcome(turn)
-        
+            # pygame.display.update()
+            if count == 9:
+                game_outcome('tie')
+            else:
+                game_outcome(turn)
+
+        valid = validMove(movePos, turn)
         if valid:
             turn = 'X' if turn == 'O' else 'O'
+            count += 1
 
         pygame.display.update()
         clock.tick(FPS)
