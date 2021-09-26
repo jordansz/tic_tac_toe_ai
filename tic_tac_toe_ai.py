@@ -248,12 +248,50 @@ def play():
         clock.tick(FPS)
 
 
-def mini_max(board, depth, is_max):
+def mini_max(b, depth, is_max):
     if checkWin(player):
         return -1
     if checkWin(bot):
         return 1
+    if checkFullBoard(b):
+        return 0
+    
+    if is_max:
+        best_score = -1000
+        for key in b.keys():
+            if b[key] == ' ':
+                b[key] = bot
+                score = mini_max(b, depth + 1, False)
+                b[key] = ' '
+                if best_score < score:
+                    best_score = score
+        return best_score
+    
+    else:
+        best_score = 1000
+        for key in b.keys():
+            if b[key] == ' ':
+                b[key] = player
+                score = mini_max(b, depth + 1, True)
+                b[key] = ' '
+                if best_score > score:
+                    best_score = score
+        return best_score
 
+def bot_move():
+    best_score = -1000
+    best_pos = 0
+    for key in board.keys():
+        if (board[key] == ' '):
+            board[key] = bot
+            score = minimax(board, 0, False)
+            board[key] = ' '
+            if (score > bestScore):
+                best_score = score
+                best_pos = key
+
+    validMove(key, bot)
+    return
 
 
 def main():
