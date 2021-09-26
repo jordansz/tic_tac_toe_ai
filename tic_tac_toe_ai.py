@@ -35,8 +35,8 @@ font2 = pygame.font.Font(pygame.font.get_default_font(), 60)
 
 
 
-player1 = ''
-player2 = ''
+player = ''
+bot = ''
 board = {'1' : ' ', '2' : ' ', '3' : ' ', 
         '4' : ' ', '5' : ' ', '6' : ' ',
         '7' : ' ', '8' : ' ', '9' : ' '}
@@ -65,19 +65,19 @@ def get_events():
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = event.pos
-            global player1, gameOver
-            if player1 == '':
-                global player2
+            global player, gameOver
+            if player == '':
+                global bot
                 # wasn't able to the collidepoint function working with o_img_rec/x_img_rec to work properly
                 # so made a quick fix
                 x_rect = pygame.Rect((WIDTH - (WIDTH // 4) - (x_img_rec.width // 2)), (HEIGHT - x_img_rec.height - 50), x_img_rec.width, x_img_rec.height)
                 o_rect = pygame.Rect(((WIDTH // 4) - (o_img_rec.width // 2)), (HEIGHT - o_img_rec.height - 50), o_img_rec.width, o_img_rec.height)
                 if o_rect.collidepoint(x, y):
-                    player1 = 'O'
-                    player2 = 'X'
+                    player = 'O'
+                    bot = 'X'
                 elif x_rect.collidepoint(x, y):
-                    player1 = 'X'
-                    player2 = 'O'
+                    player = 'X'
+                    bot = 'O'
                 break   # need break to stop from auto clicking game screen
             elif gameOver:
                 print("in game over")
@@ -93,13 +93,14 @@ def get_events():
                     pygame.quit()
                     exit()
 
-            elif player1 != '':
+            elif player != '':
                 global movePos
                 count = 1
                 for i in board_pos_on_screen:
                     test_rect = pygame.Rect(i[0], i[1], o_img_rec.width, o_img_rec.height)
                     if test_rect.collidepoint(x, y):
                         movePos = str(count)
+                        return
                     count += 1
             
                 
@@ -109,7 +110,7 @@ def get_events():
 def intro():
     #win.fill((0, 0, 0))
     redraw_intro()
-    while player1 == '':
+    while player == '':
         # x, y = pygame.mouse.get_pos()
         clock.tick(FPS)
         get_events()
@@ -154,27 +155,27 @@ def redraw_intro():
     pygame.display.update()
 
 
-def checkWin():
+def checkWin(turn):
     # diagonal check
-    if board['7'] == board['5'] and board['7'] == board['3'] and board['7'] != ' ':
+    if board['7'] == board['5'] and board['7'] == board['3'] and board['7'] == turn:
         return True
-    elif board['1'] == board['5'] and board['9'] == board['5'] and board['1'] != ' ':
+    elif board['1'] == board['5'] and board['9'] == board['5'] and board['1'] == turn:
         return True
     
     # column check
-    if board['7'] == board['4'] and board['7'] == board['1'] and board['7'] != ' ':
+    if board['7'] == board['4'] and board['7'] == board['1'] and board['7'] == turn:
         return True
-    if board['8'] == board['5'] and board['2'] == board['8'] and board['8'] != ' ':
+    if board['8'] == board['5'] and board['2'] == board['8'] and board['8'] == turn:
         return True
-    if board['3'] == board['9'] and board['3'] == board['6'] and board['3'] != ' ':
+    if board['3'] == board['9'] and board['3'] == board['6'] and board['3'] == turn:
         return True
     
     # row check
-    if board['7'] == board['8'] and board['7'] == board['9'] and board['7'] != ' ':
+    if board['7'] == board['8'] and board['7'] == board['9'] and board['7'] == turn:
         return True
-    if board['4'] == board['5'] and board['4'] == board['6'] and board['4'] != ' ':
+    if board['4'] == board['5'] and board['4'] == board['6'] and board['4'] == turn:
         return True
-    if board['1'] == board['2'] and board['3'] == board['1'] and board['3'] != ' ':
+    if board['1'] == board['2'] and board['3'] == board['1'] and board['3'] == turn:
         return True
     
     return False
@@ -188,12 +189,12 @@ def draw():
     print("\n")
 
 def revert_game_state():
-    global movePos, board, gameOver, player1, player2, turn
+    global movePos, board, gameOver, player, bot, turn
     gameOver = False
     turn = 'X'
     movePos = '0'
-    player1 = ''
-    player2 = ''
+    player = ''
+    bot = ''
     for key in board:
         board[key] = ' '
     
@@ -223,21 +224,18 @@ def play():
     count = 0
 
     while run:
-        global turn, movePos
+        global turn, movePos, gameOver
         draw_board()
         get_events()    
-
-        if checkWin() or count == 9:
-            global gameOver
+        if count == 9:
             gameOver = True
-            # pygame.display.update()
-            if count == 9:
-                game_outcome('tie')
-            else:
-                game_outcome(turn)
+            game_outcome('tie')
 
         valid = validMove(movePos, turn)
         if valid:
+            if checkWin(turn) or count == 9:
+                gameOver = True
+                game_outcome(turn)
             turn = 'X' if turn == 'O' else 'O'
             count += 1
 
