@@ -79,7 +79,8 @@ def get_events():
                 elif x_rect.collidepoint(x, y):
                     player = 'X'
                     bot = 'O'
-                break   # need break to stop from auto clicking game screen
+                return   
+                # need break to stop from auto clicking game screen
             elif gameOver:
                 # keep_playing_rec = pygame.Rect(85, 350, 590, 95)
                 if pygame.Rect(85, 350, 590, 95).collidepoint(x, y):
@@ -104,13 +105,10 @@ def get_events():
 
 
 def intro():
-    #win.fill((0, 0, 0))
     redraw_intro()
     while player == '':
-        # x, y = pygame.mouse.get_pos()
         clock.tick(FPS)
         get_events()
-        clock.tick(FPS)
 
 def game_outcome(winner):
     fade_screen = pygame.Surface((WIDTH, HEIGHT))
@@ -201,11 +199,13 @@ def revert_game_state():
     for key in board:
         board[key] = ' '
     
-def validMove(p, val):
+def validMove(b, p, val):
     if movePos not in board:
+        if bot == val:
+            print("invalid")
         return False
-    if board[p] == ' ':
-        board[p] = val
+    if b[p] == ' ':
+        b[p] = val
         return True
     return False
 
@@ -229,6 +229,7 @@ def evaluate_game_state():
     if checkWin(turn):
         gameOver = True
         game_outcome(turn)
+    return
 
 # def play():
 #     global board
@@ -259,24 +260,23 @@ def evaluate_game_state():
 #         clock.tick(FPS)
 
 def play():
-    global board
+    global board, turn, movePos
     run = True
     clock = pygame.time.Clock()
     count = 0
-
     while run:
-        global turn, movePos
+        # print ("player: ", player, " bot: ", bot, " turn: ", turn)
         draw_board()
         if player == 'X' and turn == 'X':
             get_events()
-            valid = validMove(movePos, turn)
+            valid = validMove(board, movePos, turn)
             if valid:
                 evaluate_game_state()
                 turn = 'X' if turn == 'O' else 'O'
 
         elif player == 'O' and turn == 'O':
             get_events()
-            valid = validMove(movePos, turn)
+            valid = validMove(board, movePos, turn)
             if valid:
                 evaluate_game_state()
                 turn = 'X' if turn == 'O' else 'O'
@@ -288,11 +288,10 @@ def play():
             turn = 'X' if turn == 'O' else 'O'
         
         elif bot == 'X' and turn == 'X':
+            print("HERE!!!!!!!!")
             bot_move()
             evaluate_game_state()
             turn = 'X' if turn == 'O' else 'O'
-        
-
 
         pygame.display.update()
         clock.tick(FPS)
@@ -339,10 +338,12 @@ def bot_move():
             score = mini_max(b, 0, False)
             b[key] = ' '
             if (score > best_score):
+                global movePos
+                movePos = key
                 best_score = score
                 best_pos = key
 
-    validMove(best_pos, bot)
+    validMove(board, best_pos, bot)
     return
 
 
