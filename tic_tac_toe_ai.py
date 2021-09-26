@@ -1,6 +1,7 @@
 # tic-tac-toe
 import pygame
 import pygame.freetype
+import copy
 from pygame.constants import RESIZABLE, VIDEORESIZE
 pygame.init()
 pygame.freetype.init()
@@ -219,6 +220,44 @@ def draw_board():
         elif board[str(i)] == 'O':
             win.blit(o_img, board_pos_on_screen[i-1])
 
+
+def evaluate_game_state():
+    global gameOver
+    if checkFullBoard(board):
+        gameOver = True
+        game_outcome('Tie')
+    if checkWin(turn):
+        gameOver = True
+        game_outcome(turn)
+
+# def play():
+#     global board
+#     run = True
+#     clock = pygame.time.Clock()
+#     count = 0
+
+#     while run:
+#         global turn, movePos, gameOver
+#         draw_board()
+#         get_events()    
+#         # if count == 9:
+#         #     gameOver = True
+#         #     game_outcome('tie')
+
+#         valid = validMove(movePos, turn)
+#         if valid:
+#             if checkFullBoard(board):
+#                 gameOver = True
+#                 game_outcome(turn)
+#             if checkWin(turn):
+#                 gameOver = True
+#                 game_outcome(turn)
+#             turn = 'X' if turn == 'O' else 'O'
+#             count += 1
+
+#         pygame.display.update()
+#         clock.tick(FPS)
+
 def play():
     global board
     run = True
@@ -226,23 +265,34 @@ def play():
     count = 0
 
     while run:
-        global turn, movePos, gameOver
+        global turn, movePos
         draw_board()
-        get_events()    
-        # if count == 9:
-        #     gameOver = True
-        #     game_outcome('tie')
+        if player == 'X' and turn == 'X':
+            get_events()
+            valid = validMove(movePos, turn)
+            if valid:
+                evaluate_game_state()
+                turn = 'X' if turn == 'O' else 'O'
 
-        valid = validMove(movePos, turn)
-        if valid:
-            if checkFullBoard(board):
-                gameOver = True
-                game_outcome(turn)
-            if checkWin(turn):
-                gameOver = True
-                game_outcome(turn)
+        elif player == 'O' and turn == 'O':
+            get_events()
+            valid = validMove(movePos, turn)
+            if valid:
+                evaluate_game_state()
+                turn = 'X' if turn == 'O' else 'O'
+
+        elif bot == 'O' and turn == 'O':
+            print("bots turn")
+            bot_move()
+            evaluate_game_state()
             turn = 'X' if turn == 'O' else 'O'
-            count += 1
+        
+        elif bot == 'X' and turn == 'X':
+            bot_move()
+            evaluate_game_state()
+            turn = 'X' if turn == 'O' else 'O'
+        
+
 
         pygame.display.update()
         clock.tick(FPS)
@@ -279,18 +329,20 @@ def mini_max(b, depth, is_max):
         return best_score
 
 def bot_move():
+    global board
+    b = copy.deepcopy(board)
     best_score = -1000
     best_pos = 0
-    for key in board.keys():
-        if (board[key] == ' '):
-            board[key] = bot
-            score = minimax(board, 0, False)
-            board[key] = ' '
-            if (score > bestScore):
+    for key in b.keys():
+        if (b[key] == ' '):
+            b[key] = bot
+            score = mini_max(b, 0, False)
+            b[key] = ' '
+            if (score > best_score):
                 best_score = score
                 best_pos = key
 
-    validMove(key, bot)
+    validMove(best_pos, bot)
     return
 
 
