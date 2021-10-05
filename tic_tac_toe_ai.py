@@ -152,6 +152,7 @@ def redraw_intro():
 def checkWin(turn):
     # diagonal check
     if board['7'] == board['5'] and board['7'] == board['3'] and board['7'] == turn:
+        print("here")
         return True
     elif board['1'] == board['5'] and board['9'] == board['5'] and board['1'] == turn:
         return True
@@ -223,12 +224,12 @@ def draw_board():
 
 def evaluate_game_state():
     global gameOver
-    if checkFullBoard(board):
-        gameOver = True
-        game_outcome('Tie')
     if checkWin(turn):
         gameOver = True
         game_outcome(turn)
+    if checkFullBoard(board):
+        gameOver = True
+        game_outcome('Tie')
     return
 
 # def play():
@@ -297,6 +298,7 @@ def play():
 
 def mini_max(b, depth, is_max):
     if checkWin(player):
+        print("player win")
         return -1
     if checkWin(bot):
         print("winner!!!")
@@ -334,14 +336,17 @@ def bot_move():
     best_score = -1000
     best_pos = 0
     for key in b.keys():
+        # print("best_score: ", best_score)
         if (b[key] == ' '):
             b[key] = bot
             score = mini_max(b, 0, False)
-            print("best score: ", score)
+            # draw(b)
+            # print("best score: ", score)
             b[key] = ' '
             if (score > best_score):
                 best_score = score
                 best_pos = key
+                # print("best_pos: ", best_pos)
     
     global movePos
     movePos = best_pos
