@@ -181,12 +181,12 @@ def checkFullBoard(b):
             return False
     return True
 
-def draw():
-    print(board['7'] + '|' + board['8'] + '|' + board['9'] + "    7|8|9")
+def draw(b):
+    print(b['7'] + '|' + b['8'] + '|' + b['9'] + "    7|8|9")
     print("-----    -----")
-    print(board['4'] + '|' + board['5'] + '|' + board['6'] + "    4|5|6")
+    print(b['4'] + '|' + b['5'] + '|' + b['6'] + "    4|5|6")
     print("-----    -----")
-    print(board['1'] + '|' + board['2'] + '|' + board['3'] + "    1|2|3")
+    print(b['1'] + '|' + b['2'] + '|' + b['3'] + "    1|2|3")
     print("\n")
 
 def revert_game_state():
@@ -282,13 +282,11 @@ def play():
                 turn = 'X' if turn == 'O' else 'O'
 
         elif bot == 'O' and turn == 'O':
-            print("bots turn")
             bot_move()
             evaluate_game_state()
             turn = 'X' if turn == 'O' else 'O'
         
         elif bot == 'X' and turn == 'X':
-            print("HERE!!!!!!!!")
             bot_move()
             evaluate_game_state()
             turn = 'X' if turn == 'O' else 'O'
@@ -301,6 +299,7 @@ def mini_max(b, depth, is_max):
     if checkWin(player):
         return -1
     if checkWin(bot):
+        print("winner!!!")
         return 1
     if checkFullBoard(b):
         return 0
@@ -311,6 +310,7 @@ def mini_max(b, depth, is_max):
             if b[key] == ' ':
                 b[key] = bot
                 score = mini_max(b, depth + 1, False)
+
                 b[key] = ' '
                 if best_score < score:
                     best_score = score
@@ -324,6 +324,7 @@ def mini_max(b, depth, is_max):
                 score = mini_max(b, depth + 1, True)
                 b[key] = ' '
                 if best_score > score:
+                    # print("best score: ", score)
                     best_score = score
         return best_score
 
@@ -336,12 +337,14 @@ def bot_move():
         if (b[key] == ' '):
             b[key] = bot
             score = mini_max(b, 0, False)
+            print("best score: ", score)
             b[key] = ' '
             if (score > best_score):
-                global movePos
-                movePos = key
                 best_score = score
                 best_pos = key
+    
+    global movePos
+    movePos = best_pos
 
     validMove(board, best_pos, bot)
     return
