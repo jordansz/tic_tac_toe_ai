@@ -149,28 +149,27 @@ def redraw_intro():
     pygame.display.update()
 
 
-def checkWin(turn):
+def checkWin(turn, b):
     # diagonal check
-    if board['7'] == board['5'] and board['7'] == board['3'] and board['7'] == turn:
-        print("here")
+    if b['7'] == b['5'] and b['7'] == b['3'] and b['7'] == turn:
         return True
-    elif board['1'] == board['5'] and board['9'] == board['5'] and board['1'] == turn:
+    elif b['1'] == b['5'] and b['9'] == b['5'] and b['1'] == turn:
         return True
     
     # column check
-    if board['7'] == board['4'] and board['7'] == board['1'] and board['7'] == turn:
+    if b['7'] == b['4'] and b['7'] == b['1'] and b['7'] == turn:
         return True
-    if board['8'] == board['5'] and board['2'] == board['8'] and board['8'] == turn:
+    if b['8'] == b['5'] and b['2'] == b['8'] and b['8'] == turn:
         return True
-    if board['3'] == board['9'] and board['3'] == board['6'] and board['3'] == turn:
+    if b['3'] == b['9'] and b['3'] == b['6'] and b['3'] == turn:
         return True
     
     # row check
-    if board['7'] == board['8'] and board['7'] == board['9'] and board['7'] == turn:
+    if b['7'] == b['8'] and b['7'] == b['9'] and b['7'] == turn:
         return True
-    if board['4'] == board['5'] and board['4'] == board['6'] and board['4'] == turn:
+    if b['4'] == b['5'] and b['4'] == b['6'] and b['4'] == turn:
         return True
-    if board['1'] == board['2'] and board['3'] == board['1'] and board['3'] == turn:
+    if b['1'] == b['2'] and b['3'] == b['1'] and b['3'] == turn:
         return True
     
     return False
@@ -224,7 +223,7 @@ def draw_board():
 
 def evaluate_game_state():
     global gameOver
-    if checkWin(turn):
+    if checkWin(turn, board):
         gameOver = True
         game_outcome(turn)
     if checkFullBoard(board):
@@ -297,11 +296,9 @@ def play():
 
 
 def mini_max(b, depth, is_max):
-    if checkWin(player):
-        print("player win")
+    if checkWin(player, b):
         return -1
-    if checkWin(bot):
-        print("winner!!!")
+    if checkWin(bot, b):
         return 1
     if checkFullBoard(b):
         return 0
@@ -326,7 +323,6 @@ def mini_max(b, depth, is_max):
                 score = mini_max(b, depth + 1, True)
                 b[key] = ' '
                 if best_score > score:
-                    # print("best score: ", score)
                     best_score = score
         return best_score
 
@@ -336,17 +332,13 @@ def bot_move():
     best_score = -1000
     best_pos = 0
     for key in b.keys():
-        # print("best_score: ", best_score)
         if (b[key] == ' '):
             b[key] = bot
             score = mini_max(b, 0, False)
-            # draw(b)
-            # print("best score: ", score)
             b[key] = ' '
             if (score > best_score):
                 best_score = score
                 best_pos = key
-                # print("best_pos: ", best_pos)
     
     global movePos
     movePos = best_pos
