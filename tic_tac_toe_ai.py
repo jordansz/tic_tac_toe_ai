@@ -1,5 +1,7 @@
 # tic-tac-toe
+import timeit
 import pygame
+from pygame import time
 import pygame.freetype
 import copy
 from pygame.constants import RESIZABLE, VIDEORESIZE
@@ -280,17 +282,21 @@ def play():
             if valid:
                 evaluate_game_state()
                 turn = 'X' if turn == 'O' else 'O'
-
-        elif bot == 'O' and turn == 'O':
-            bot_move()
-            evaluate_game_state()
-            turn = 'X' if turn == 'O' else 'O'
+        else:
+            start = timeit.default_timer()
+            if bot == 'O' and turn == 'O':
+                bot_move()
+                evaluate_game_state()
+                turn = 'X' if turn == 'O' else 'O'
+            
+            elif bot == 'X' and turn == 'X':
+                bot_move()
+                evaluate_game_state()
+                turn = 'X' if turn == 'O' else 'O'
+            stop = timeit.default_timer()
+            sim_time = stop - start
+            print("Minimax time: ", sim_time)
         
-        elif bot == 'X' and turn == 'X':
-            bot_move()
-            evaluate_game_state()
-            turn = 'X' if turn == 'O' else 'O'
-
         pygame.display.update()
         clock.tick(FPS)
 
